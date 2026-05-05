@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo cáo dòng tiền — Tháng 4/2026 & Dự báo T5/2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f4ee;
+    --bg-tertiary: #ebe9e0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --text-success: #3B6D11;
+    --text-danger: #A32D2D;
+    --text-info: #185FA5;
+    --border-tertiary: rgba(0,0,0,0.08);
+    --border-secondary: rgba(0,0,0,0.16);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 24px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .page {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    border: 0.5px solid var(--border-tertiary);
+  }
+  .page-title {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 28px 0 8px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .grid { display: grid; gap: 12px; }
+  .grid-4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+  .metric-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+  }
+  .metric-card.outlined {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-tertiary);
+    border-radius: var(--radius-lg);
+  }
+  .metric-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .metric-value {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .metric-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .alert {
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .alert-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .alert-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .alert-body { font-size: 13px; line-height: 1.6; }
+  .alert-danger { background: #FCEBEB; }
+  .alert-danger .alert-dot { background: #A32D2D; }
+  .alert-danger .alert-title { color: #501313; }
+  .alert-danger .alert-body { color: #791F1F; }
+  .alert-warning { background: #FAEEDA; }
+  .alert-warning .alert-dot { background: #854F0B; }
+  .alert-warning .alert-title { color: #412402; }
+  .alert-warning .alert-body { color: #633806; }
+  .alert-success { background: #EAF3DE; }
+  .alert-success .alert-dot { background: #3B6D11; }
+  .alert-success .alert-title { color: #173404; }
+  .alert-success .alert-body { color: #27500A; }
+  .alert-info {
+    background: #E6F1FB;
+    border-left: 3px solid #185FA5;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #042C53;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .chart-280 { height: 280px; }
+  .chart-240 { height: 240px; }
+  .chart-320 { height: 320px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  .control-group {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .slider-row { margin-bottom: 18px; }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .slider-header span:first-child { font-size: 14px; font-weight: 500; }
+  .slider-header span:last-child { font-size: 14px; font-weight: 500; }
+  .slider-desc {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--border-secondary);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+    border: none;
+  }
+
+  button {
+    background: transparent;
+    border: 0.5px solid var(--border-secondary);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background 0.15s ease;
+  }
+  button:hover { background: var(--bg-secondary); }
+  button:active { transform: scale(0.98); }
+  button.active {
+    background: var(--text-primary);
+    color: white;
+    border-color: var(--text-primary);
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .runway-card {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .runway-bar-track {
+    flex: 1;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    height: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+  .runway-bar-fill {
+    height: 100%;
+    background: #1D9E75;
+    transition: all 0.25s ease;
+    width: 100%;
+  }
+  .runway-tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(0,0,0,0.25);
+  }
+
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  table.matrix th {
+    text-align: center;
+    padding: 8px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    border-bottom: 0.5px solid var(--border-tertiary);
+  }
+  table.matrix th:first-child { text-align: left; }
+  table.matrix td {
+    text-align: center;
+    padding: 10px 8px;
+    font-weight: 500;
+  }
+  table.matrix td:first-child {
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 400;
+    white-space: nowrap;
+    background: transparent !important;
+  }
+
+  .rec-item {
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .rec-priority {
+    font-size: 10px;
+    padding: 3px 9px;
+    color: white;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .rec-text { font-size: 13px; line-height: 1.65; flex: 1; }
+  .rec-timing {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    font-style: italic;
+  }
+  .rec-now { background: #FCEBEB; }
+  .rec-now .rec-priority { background: #A32D2D; }
+  .rec-now .rec-text { color: #501313; }
+  .rec-week { background: #FAEEDA; }
+  .rec-week .rec-priority { background: #854F0B; }
+  .rec-week .rec-text { color: #412402; }
+  .rec-month { background: #EAF3DE; }
+  .rec-month .rec-priority { background: #3B6D11; }
+  .rec-month .rec-text { color: #173404; }
+
+  .leverage-card {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .leverage-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .leverage-item { flex: 1; min-width: 120px; }
+  .leverage-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .leverage-value { font-size: 16px; font-weight: 500; }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    padding: 16px 0 8px;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .page { page-break-after: always; box-shadow: none; border: none; }
+    button, .btn-row { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===================== TRANG 1: TỔNG QUAN ===================== -->
+  <div class="page">
+    <h1 class="page-title">Báo cáo dòng tiền</h1>
+    <div class="page-subtitle">Tháng 4/2026 (thực tế) · Tháng 5/2026 (dự báo)</div>
+
+    <div class="grid grid-4">
+      <div class="metric-card">
+        <div class="metric-label">Tiền đầu kỳ T4</div>
+        <div class="metric-value">6,64 tỷ</div>
+        <div class="metric-sub">Tiền có thể chi tiêu</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Thu T4 thực tế</div>
+        <div class="metric-value" style="color: var(--text-success);">+8,72 tỷ</div>
+        <div class="metric-sub">Đạt 79% so với KH</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Chi T4 thực tế</div>
+        <div class="metric-value" style="color: var(--text-danger);">−8,08 tỷ</div>
+        <div class="metric-sub">Tiết kiệm 6% so KH</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tiền cuối kỳ T4</div>
+        <div class="metric-value">7,28 tỷ</div>
+        <div class="metric-sub" style="color: var(--text-success);">▲ +0,65 tỷ</div>
+      </div>
+    </div>
+
+    <div class="alert alert-danger">
+      <div class="alert-dot"></div>
+      <div>
+        <div class="alert-title">Cảnh báo thanh khoản</div>
+        <div class="alert-body">Sau khi trừ dự phòng vận hành 1 tháng tiếp theo, công ty thiếu hụt <strong>−907 triệu</strong>. Tiền khả dụng hiện không đủ để vừa chi tiêu T5 vừa giữ buffer an toàn. Số ngày tiền mặt còn lại khoảng 32 ngày, dưới ngưỡng khuyến nghị 60 ngày.</div>
+      </div>
+    </div>
+
+    <div class="section-title">3 chỉ số phản ánh sức khỏe dòng tiền</div>
+    <div class="section-desc">Các thước đo quan trọng để đánh giá nhanh tình trạng thanh khoản và hiệu quả thu hồi.</div>
+
+    <div class="grid grid-3">
+      <div class="metric-card outlined">
+        <div class="metric-label">Tỷ lệ thu hồi theo kế hoạch</div>
+        <div class="metric-value">79,3%</div>
+        <div class="metric-sub">Tiền thực thu / Tiền dự kiến thu. Dưới 100% nghĩa là thu chậm hơn kế hoạch.</div>
+      </div>
+      <div class="metric-card outlined">
+        <div class="metric-label">Hệ số trang trải vận hành</div>
+        <div class="metric-value">1,11×</div>
+        <div class="metric-sub">Tiền vào / Tiền chi vận hành. Dưới 1× nghĩa là phải tiêu vào tiền dự trữ.</div>
+      </div>
+      <div class="metric-card outlined">
+        <div class="metric-label">Số ngày tiền mặt còn lại</div>
+        <div class="metric-value">~32 ngày</div>
+        <div class="metric-sub">Tổ chức trụ được bao lâu nếu không có thêm thu. Mức an toàn ≥ 60 ngày.</div>
+      </div>
+    </div>
+
+    <div class="section-title">Cơ cấu thu T4 theo dòng sản phẩm</div>
+    <div class="section-desc">CFA và ACCA đóng góp 68% tổng tiền thu — đây là <strong>rủi ro tập trung</strong> cần giám sát: nếu 1 trong 2 dòng sản phẩm này gián đoạn, dòng tiền sẽ chịu tác động nặng.</div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background: #185FA5;"></span>CFA 39%</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #378ADD;"></span>ACCA 29%</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #1D9E75;"></span>CMA 18%</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #5DCAA5;"></span>Cert/Dip 5%</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #BA7517;"></span>B2B 4%</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #888780;"></span>Khác 5%</span>
+    </div>
+
+    <div class="chart-wrapper chart-240">
+      <canvas id="chartRevenue" role="img" aria-label="Cơ cấu tiền vào theo dòng sản phẩm tháng 4"></canvas>
+    </div>
+
+    <div class="section-title">Cơ cấu chi T4 — phân loại theo tính chất</div>
+    <div class="section-desc">Tổ chức có <strong>cơ cấu chi cứng</strong> — lương và chi vận hành cố định chiếm phần lớn, không thể cắt nhanh. Phần có thể trì hoãn chỉ chiếm tỷ lệ nhỏ.</div>
+
+    <div class="chart-wrapper chart-320">
+      <canvas id="chartCost" role="img" aria-label="Cơ cấu chi tháng 4 theo tính chất"></canvas>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="metric-card outlined">
+        <div class="metric-label">Chi cứng — không thể cắt nhanh</div>
+        <div class="metric-value">6,38 tỷ</div>
+        <div class="metric-sub">Lương, BHXH, thuê nhà, điện nước, IT, quảng cáo định kỳ — chiếm <strong>79% tổng chi</strong>. Cắt giảm cần ít nhất 1 tháng chuẩn bị.</div>
+      </div>
+      <div class="metric-card outlined">
+        <div class="metric-label">Chi mềm — có thể trì hoãn</div>
+        <div class="metric-value">884 triệu</div>
+        <div class="metric-sub">Sự kiện, tài trợ, branding, xây dựng, HR getaway — chiếm <strong>11% tổng chi</strong>. Đây là dư địa cắt giảm khẩn cấp.</div>
+      </div>
+    </div>
+
+    <div class="section-title">Dự báo dòng tiền T5/2026</div>
+    <div class="metric-card" style="padding: 18px 20px;">
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+        <div>
+          <div class="metric-label">Tiền đầu kỳ</div>
+          <div style="font-size: 18px; font-weight: 500;">7,28 tỷ</div>
+        </div>
+        <div>
+          <div class="metric-label">Thu dự kiến</div>
+          <div style="font-size: 18px; font-weight: 500; color: var(--text-success);">+7,46 tỷ</div>
+          <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">Đã trừ giả định 30% rớt KH</div>
+        </div>
+        <div>
+          <div class="metric-label">Chi dự kiến</div>
+          <div style="font-size: 18px; font-weight: 500; color: var(--text-danger);">−8,88 tỷ</div>
+        </div>
+        <div>
+          <div class="metric-label">Tiền cuối kỳ</div>
+          <div style="font-size: 18px; font-weight: 500;">9,06 tỷ</div>
+          <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">Tăng nhờ tiền tồn</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TRANG 2: KỊCH BẢN & QUYẾT ĐỊNH ===================== -->
+  <div class="page">
+    <h1 class="page-title">Phân tích kịch bản dòng tiền</h1>
+    <div class="page-subtitle">Kéo slider để thấy tác động lên thanh khoản tháng 5/2026</div>
+
+    <div class="btn-row">
+      <button onclick="setScenario('best', this)">Lạc quan</button>
+      <button onclick="setScenario('base', this)" class="active">Cơ sở (theo KH)</button>
+      <button onclick="setScenario('actual', this)">Lặp lại thực tế T4</button>
+      <button onclick="setScenario('stress', this)">Kiểm tra sức chịu</button>
+      <button onclick="setScenario('crisis', this)">Khủng hoảng</button>
+    </div>
+
+    <div class="control-group">
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Tỷ lệ thu hồi so với kế hoạch</span>
+          <span id="revenue-out">100%</span>
+        </div>
+        <div class="slider-desc">Phản ánh rủi ro thu chậm: học viên hoãn nộp, B2B giãn thanh toán, học viên rút khóa</div>
+        <input type="range" min="0" max="120" value="100" step="5" id="revenue-slider">
+        <div class="slider-ticks"><span>0%</span><span>30%</span><span>50%</span><span>70%</span><span>100%</span><span>120%</span></div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Cắt giảm chi mềm</span>
+          <span id="cut-out">0%</span>
+        </div>
+        <div class="slider-desc">Tỷ lệ cắt trên các khoản có thể trì hoãn — sự kiện, tài trợ, branding, xây dựng, HR getaway</div>
+        <input type="range" min="0" max="100" value="0" step="5" id="cut-slider">
+        <div class="slider-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Hoãn chia cổ tức</span>
+          <span id="dividend-out">0 triệu</span>
+        </div>
+        <div class="slider-desc">Giữ lại lợi nhuận thay vì chia — đòn bẩy ít tổn thương vận hành nhất</div>
+        <input type="range" min="0" max="2000" value="0" step="100" id="dividend-slider">
+        <div class="slider-ticks"><span>0</span><span>500 tr</span><span>1 tỷ</span><span>1,5 tỷ</span><span>2 tỷ</span></div>
+      </div>
+    </div>
+
+    <div id="alert-banner" class="alert">
+      <div class="alert-dot"></div>
+      <div style="flex: 1;">
+        <div class="alert-title" id="alert-title"></div>
+        <div class="alert-body" id="alert-body"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom: 20px;">
+      <div class="metric-card">
+        <div class="metric-label">Tiền thu T5</div>
+        <div class="metric-value" id="m-revenue" style="color: var(--text-success);">+7,46 tỷ</div>
+        <div class="metric-sub" id="m-revenue-sub">100% kế hoạch</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tiền chi T5</div>
+        <div class="metric-value" id="m-cost" style="color: var(--text-danger);">−8,88 tỷ</div>
+        <div class="metric-sub" id="m-cost-sub">Chưa cắt giảm</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tiền cuối kỳ T5</div>
+        <div class="metric-value" id="m-end">9,06 tỷ</div>
+        <div class="metric-sub" id="m-end-sub">▲ +1,78 tỷ</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Mức dự phòng</div>
+        <div class="metric-value" id="m-buffer">−907 tr</div>
+        <div class="metric-sub" id="m-buffer-sub">So với 1 tháng chi cố định</div>
+      </div>
+    </div>
+
+    <div class="runway-card">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">Số ngày tiền mặt còn duy trì được</div>
+      <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 12px; line-height: 1.5;">Số ngày tổ chức trụ được nếu không có thêm thu — mức tham chiếu cho doanh nghiệp giáo dục: tối thiểu 60 ngày, an toàn từ 90 ngày trở lên</div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="runway-bar-track">
+          <div id="runway-bar" class="runway-bar-fill"></div>
+          <div class="runway-tick" style="left: 33.3%;"></div>
+          <div class="runway-tick" style="left: 66.6%; background: rgba(0,0,0,0.18);"></div>
+        </div>
+        <span id="runway-out" style="font-size: 16px; font-weight: 500; min-width: 90px; text-align: right;">~40 ngày</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--text-tertiary);">
+        <span>0</span><span>30 ngày (báo động)</span><span>60 ngày (chấp nhận)</span><span>≥ 90 ngày (mạnh)</span>
+      </div>
+    </div>
+
+    <div class="leverage-card">
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">Tổng tiền giữ lại được nhờ các đòn bẩy</div>
+      <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 12px; line-height: 1.5;">Cộng dồn từ cắt chi và hoãn cổ tức — phần thanh khoản tăng thêm so với kịch bản không can thiệp</div>
+      <div class="leverage-row">
+        <div class="leverage-item">
+          <div class="leverage-label">Từ cắt chi mềm</div>
+          <div class="leverage-value" id="leverage-cut">0 triệu</div>
+        </div>
+        <div class="leverage-item">
+          <div class="leverage-label">Từ hoãn cổ tức</div>
+          <div class="leverage-value" id="leverage-div">0 triệu</div>
+        </div>
+        <div class="leverage-item">
+          <div class="leverage-label">Tổng tiền giữ lại</div>
+          <div class="leverage-value" id="leverage-total" style="color: var(--text-info);">0 triệu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Ma trận kịch bản — đối chiếu nhanh</div>
+    <div class="section-desc">Mỗi ô là tiền cuối kỳ T5 (tỷ VND) ứng với % thu thực tế và mức cắt chi mềm. Chưa tính tác động hoãn cổ tức.</div>
+
+    <div style="overflow-x: auto;">
+      <table class="matrix" id="matrix-table">
+        <thead>
+          <tr>
+            <th>Tỷ lệ thu ↓ / Cắt chi →</th>
+            <th>0%</th><th>25%</th><th>50%</th><th>75%</th><th>100%</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+
+    <div class="legend" style="margin-bottom: 24px;">
+      <span class="legend-item"><span class="legend-swatch" style="background: #C0DD97;"></span>Lành mạnh (≥ 9 tỷ)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #FAC775;"></span>Cần theo dõi (5–9 tỷ)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #F09595;"></span>Báo động (< 5 tỷ)</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: #A32D2D;"></span>Khủng hoảng (âm)</span>
+    </div>
+
+    <div class="section-title">Đề xuất hành động — phân theo thời gian thực hiện</div>
+    <div class="section-desc">Đề xuất cập nhật theo kịch bản đang chọn. Mỗi hành động kèm thời gian triển khai cụ thể để dễ phân công.</div>
+    <div id="recommendations" style="margin-bottom: 20px;"></div>
+
+    <div class="alert-info" style="margin-top: 20px;">
+      <strong>Một số thuật ngữ trong báo cáo:</strong><br>
+      • <strong>Mức dự phòng:</strong> Phần tiền dư so với 1 tháng chi cố định. Dương = an toàn, âm = thiếu dự phòng.<br>
+      • <strong>Số ngày tiền mặt:</strong> Tổ chức trụ được bao lâu nếu không có thêm thu nào.<br>
+      • <strong>Chi cứng / chi mềm:</strong> Chi cứng phải trả đúng hạn (lương, thuê nhà). Chi mềm có thể trì hoãn (sự kiện, tài trợ).<br>
+      • <strong>Rủi ro tập trung:</strong> Khi quá nhiều thu phụ thuộc vào ít sản phẩm — gián đoạn 1 sản phẩm gây tác động lớn.
+    </div>
+  </div>
+
+  <div class="footer">
+    Báo cáo nội bộ · Bảo mật · Kỳ báo cáo T4–T5/2026
+  </div>
+
+</div>
+
+<script>
+const data = {
+  beginCash: 7283.83,
+  revenuePlan: 10655.67,
+  costMandatory: 6857.79,
+  costNonEssential: 2022.51,
+  monthlyMandatoryCost: 6769.25,
+  dailyBurnRate: 6769.25 / 30
+};
+
+const scenarios = {
+  best:   { rev: 110, cut: 0,  div: 0 },
+  base:   { rev: 100, cut: 0,  div: 0 },
+  actual: { rev: 78,  cut: 0,  div: 0 },
+  stress: { rev: 50,  cut: 50, div: 1000 },
+  crisis: { rev: 30,  cut: 75, div: 2000 }
+};
+
+const fmt = (n) => {
+  if (Math.abs(n) >= 1000) return (n / 1000).toFixed(2).replace('.', ',') + ' tỷ';
+  return Math.round(n).toLocaleString('vi-VN') + ' tr';
+};
+const fmtSigned = (n) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n));
+
+function calculate(revPct, cutPct, divAmt) {
+  const revenue = data.revenuePlan * (revPct / 100);
+  const costCut = data.costNonEssential * (cutPct / 100);
+  const totalCost = data.costMandatory + data.costNonEssential - costCut;
+  const endCash = data.beginCash + revenue - totalCost + divAmt;
+  const buffer = endCash - data.monthlyMandatoryCost;
+  const dcoh = endCash / data.dailyBurnRate;
+  return { revenue, totalCost, endCash, buffer, dcoh, costCut };
+}
+
+function updateUI() {
+  const revPct = parseInt(document.getElementById('revenue-slider').value);
+  const cutPct = parseInt(document.getElementById('cut-slider').value);
+  const divAmt = parseInt(document.getElementById('dividend-slider').value);
+
+  document.getElementById('revenue-out').textContent = revPct + '%';
+  document.getElementById('cut-out').textContent = cutPct + '%';
+  document.getElementById('dividend-out').textContent = divAmt === 0 ? '0 triệu' : fmt(divAmt);
+
+  const r = calculate(revPct, cutPct, divAmt);
+
+  document.getElementById('m-revenue').textContent = '+' + fmt(r.revenue);
+  document.getElementById('m-revenue-sub').textContent = revPct + '% kế hoạch';
+  document.getElementById('m-cost').textContent = '−' + fmt(r.totalCost);
+  document.getElementById('m-cost-sub').textContent = cutPct > 0 ? 'Tiết kiệm ' + fmt(r.costCut) : 'Chưa cắt giảm';
+  document.getElementById('m-end').textContent = fmt(r.endCash);
+  const delta = r.endCash - data.beginCash;
+  document.getElementById('m-end-sub').textContent = (delta >= 0 ? '▲ ' : '▼ ') + fmtSigned(delta);
+
+  const bufferEl = document.getElementById('m-buffer');
+  bufferEl.textContent = fmtSigned(r.buffer);
+  bufferEl.style.color = r.buffer >= 0 ? 'var(--text-success)' : 'var(--text-danger)';
+  document.getElementById('m-buffer-sub').textContent = r.buffer >= 0 ? 'Đủ dự phòng 1 tháng' : 'Thiếu so với mức tối thiểu';
+
+  document.getElementById('leverage-cut').textContent = r.costCut === 0 ? '0 triệu' : '+' + fmt(r.costCut);
+  document.getElementById('leverage-div').textContent = divAmt === 0 ? '0 triệu' : '+' + fmt(divAmt);
+  document.getElementById('leverage-total').textContent = (r.costCut + divAmt) === 0 ? '0 triệu' : '+' + fmt(r.costCut + divAmt);
+
+  const runwayPct = Math.min(100, (r.dcoh / 90) * 100);
+  document.getElementById('runway-bar').style.width = runwayPct + '%';
+  document.getElementById('runway-out').textContent = '~' + Math.round(r.dcoh) + ' ngày';
+  if (r.dcoh >= 60) document.getElementById('runway-bar').style.background = '#1D9E75';
+  else if (r.dcoh >= 30) document.getElementById('runway-bar').style.background = '#EF9F27';
+  else document.getElementById('runway-bar').style.background = '#E24B4A';
+
+  const banner = document.getElementById('alert-banner');
+  const title = document.getElementById('alert-title');
+  const body = document.getElementById('alert-body');
+  banner.className = 'alert';
+
+  if (r.dcoh >= 60 && r.buffer >= 0) {
+    banner.classList.add('alert-success');
+    title.textContent = 'Tình trạng: Lành mạnh';
+    body.textContent = 'Số dư cuối kỳ đủ chi vận hành T5 và còn dự phòng cho ít nhất 1 tháng tiếp theo. Số ngày tiền mặt đạt mức chấp nhận. Có thể duy trì kế hoạch đầu tư và chia cổ tức bình thường.';
+  } else if (r.dcoh >= 30) {
+    banner.classList.add('alert-warning');
+    title.textContent = 'Tình trạng: Cần theo dõi — dự phòng mỏng';
+    body.textContent = 'Tiền vẫn đủ chi T5 nhưng dự phòng cho tháng kế tiếp mỏng hoặc âm. Cần chủ động: hoãn cổ tức, đẩy nhanh thu hồi, hoặc cắt chi mềm trước chu kỳ thu tiếp theo.';
+  } else if (r.endCash >= 0) {
+    banner.classList.add('alert-danger');
+    title.textContent = 'Tình trạng: Báo động — không đủ chi tháng tiếp';
+    body.textContent = 'Số dư cuối kỳ không đủ chi vận hành tháng kế tiếp. Bắt buộc kích hoạt phương án dự phòng: hoãn cổ tức, rút thấu chi ngân hàng, hoặc đàm phán giãn thanh toán với nhà cung cấp.';
+  } else {
+    banner.classList.add('alert-danger');
+    title.textContent = 'Tình trạng: Khủng hoảng — âm tiền trong tháng';
+    body.textContent = 'Số dư cuối kỳ dự báo âm — không đủ tiền tất toán các khoản chi trong kỳ. Cần huy động nguồn tài chính ngay: rút thấu chi, tất toán sổ tiết kiệm, hoặc đàm phán giãn nợ với nhà cung cấp.';
+  }
+
+  updateRecommendations(r, revPct, cutPct, divAmt);
+}
+
+function updateRecommendations(r, revPct, cutPct, divAmt) {
+  const recs = [];
+  if (r.dcoh < 30) {
+    recs.push({ p: 'now', label: 'NGAY', t: '<strong>Hoãn toàn bộ chia cổ tức kỳ này</strong> — cần tối thiểu 1–2 tỷ để vượt qua tháng. Đây là đòn bẩy ít tổn thương vận hành nhất.', timing: 'Trong 1–3 ngày làm việc' });
+    recs.push({ p: 'now', label: 'NGAY', t: '<strong>Rút thấu chi BIDV</strong> hoặc tất toán sổ tiết kiệm khả dụng (~163 triệu) để bổ sung thanh khoản.', timing: 'Trong tuần này' });
+    recs.push({ p: 'week', label: 'TUẦN NÀY', t: '<strong>Đàm phán giãn các khoản chi không cấp bách:</strong> thuê nhà FTU (159 triệu, đang trong quá trình deal), xây dựng (150 triệu), HR getaway (518 triệu).', timing: 'Hoàn thành đàm phán trong 5–7 ngày' });
+  }
+  if (revPct < 70) {
+    recs.push({ p: 'now', label: 'NGAY', t: '<strong>Tăng cường thu hồi từ ACCA và CFA</strong> — 2 dòng sản phẩm chiếm 68% tổng thu. Cải thiện 10% sẽ tác động đáng kể đến thanh khoản.', timing: 'Bắt đầu ngay tuần này' });
+    recs.push({ p: 'week', label: 'TUẦN NÀY', t: '<strong>Triển khai chương trình ưu đãi đóng học phí sớm</strong> cho học viên CFA, CMA — discount nhẹ để rút ngắn thời gian thu.', timing: 'Lên phương án 2–3 ngày, triển khai trong tuần' });
+    recs.push({ p: 'month', label: 'THÁNG NÀY', t: '<strong>Rà soát quy trình thu hồi:</strong> kiểm tra danh sách học viên CFA/CMA chưa nộp, đánh giá lại chu kỳ nhắc nhở và điều khoản thanh toán hiện tại.', timing: 'Trong vòng 30 ngày' });
+  }
+  if (cutPct === 0 && divAmt === 0 && r.buffer < 0) {
+    recs.push({ p: 'week', label: 'TUẦN NÀY', t: '<strong>Ưu tiên hoãn cổ tức trước khi cắt chi</strong> — đòn bẩy này không ảnh hưởng vận hành. Cắt chi vận hành có thể tổn thương tinh thần đội ngũ và ảnh hưởng dài hạn.', timing: 'Quyết định trong cuộc họp ban điều hành tuần này' });
+    recs.push({ p: 'week', label: 'TUẦN NÀY', t: '<strong>Cắt 25–50% chi mềm:</strong> sự kiện, tài trợ, branding — có thể tiết kiệm 500 triệu – 1 tỷ mà không ảnh hưởng hoạt động cốt lõi.', timing: 'Áp dụng từ tuần kế tiếp' });
+  }
+  if (divAmt > 0 && cutPct === 0 && r.buffer < 0) {
+    recs.push({ p: 'week', label: 'TUẦN NÀY', t: '<strong>Bổ sung kỷ luật chi tiêu:</strong> đã hoãn ' + fmt(divAmt) + ' cổ tức nhưng dự phòng vẫn âm. Cần thêm 25% cắt chi mềm để đạt ngưỡng an toàn.', timing: 'Triển khai trong 7 ngày' });
+  }
+  if (r.dcoh >= 60 && r.buffer >= 0 && cutPct === 0 && revPct >= 90 && divAmt === 0) {
+    recs.push({ p: 'month', label: 'THÁNG NÀY', t: '<strong>Duy trì chính sách cổ tức</strong> — thanh khoản lành mạnh, có thể chia cổ tức theo kế hoạch và đầu tư thêm vào marketing để đẩy thu T6.', timing: 'Đưa vào kế hoạch tháng tiếp theo' });
+    recs.push({ p: 'month', label: 'THÁNG NÀY', t: '<strong>Tối ưu tiền nhàn rỗi</strong> — chuyển phần dư sang gửi tiết kiệm ngắn hạn để tăng thu nhập từ lãi.', timing: 'Trong vòng 30 ngày' });
+  }
+  if (r.dcoh >= 60 && divAmt > 1000) {
+    recs.push({ p: 'month', label: 'THÁNG NÀY', t: '<strong>Cân nhắc lại mức hoãn cổ tức</strong> — thanh khoản đã đủ, có thể chỉ hoãn 30–50% để cân bằng giữa giữ tiền và niềm tin của cổ đông.', timing: 'Đưa ra quyết định cuối tháng' });
+  }
+  if (recs.length === 0) {
+    recs.push({ p: 'month', label: 'THÁNG NÀY', t: '<strong>Tiếp tục giám sát hàng tuần</strong> — theo dõi sát biến động thu, cập nhật dự báo khi có chênh lệch trên 10%.', timing: 'Định kỳ hàng tuần' });
+  }
+
+  document.getElementById('recommendations').innerHTML = recs.map(rec =>
+    '<div class="rec-item rec-' + rec.p + '">' +
+      '<span class="rec-priority">' + rec.label + '</span>' +
+      '<div style="flex: 1;">' +
+        '<div class="rec-text">' + rec.t + '</div>' +
+        '<div class="rec-timing">⏱ ' + rec.timing + '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function buildMatrix() {
+  const revRows = [110, 100, 80, 60, 40, 20];
+  const cutCols = [0, 25, 50, 75, 100];
+  const tbody = document.getElementById('matrix-body');
+  tbody.innerHTML = revRows.map(rev => {
+    const cells = cutCols.map(cut => {
+      const r = calculate(rev, cut, 0);
+      const v = r.endCash;
+      let bg, color;
+      if (v >= 9000)      { bg = '#C0DD97'; color = '#173404'; }
+      else if (v >= 5000) { bg = '#FAC775'; color = '#412402'; }
+      else if (v >= 0)    { bg = '#F09595'; color = '#501313'; }
+      else                { bg = '#A32D2D'; color = 'white'; }
+      let display;
+      if (v >= 0) display = (v / 1000).toFixed(2).replace('.', ',');
+      else display = '−' + (Math.abs(v) / 1000).toFixed(2).replace('.', ',');
+      return '<td style="background: ' + bg + '; color: ' + color + ';">' + display + '</td>';
+    }).join('');
+    return '<tr><td>Thu ' + rev + '%</td>' + cells + '</tr>';
+  }).join('');
+}
+
+function setScenario(name, btnEl) {
+  const s = scenarios[name];
+  document.getElementById('revenue-slider').value = s.rev;
+  document.getElementById('cut-slider').value = s.cut;
+  document.getElementById('dividend-slider').value = s.div;
+  document.querySelectorAll('.btn-row button').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  updateUI();
+}
+
+document.getElementById('revenue-slider').addEventListener('input', updateUI);
+document.getElementById('cut-slider').addEventListener('input', updateUI);
+document.getElementById('dividend-slider').addEventListener('input', updateUI);
+
+new Chart(document.getElementById('chartRevenue'), {
+  type: 'doughnut',
+  data: {
+    labels: ['CFA', 'ACCA', 'CMA', 'Cert/Dip', 'B2B', 'SCs', 'CGMA', 'Thu nhập khác'],
+    datasets: [{
+      data: [3338, 2476, 1538, 418, 367, 133, 48, 224],
+      backgroundColor: ['#185FA5', '#378ADD', '#1D9E75', '#5DCAA5', '#BA7517', '#9FE1CB', '#EF9F27', '#888780'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '55%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => c.label + ': ' + c.raw.toLocaleString('vi-VN') + ' tr (' + Math.round(c.raw / 8542 * 100) + '%)' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartCost'), {
+  type: 'bar',
+  data: {
+    labels: ['Lương + BHXH', 'Vận hành định kỳ', 'Vận hành không định kỳ', 'Vận hành khác', 'Đầu tư + xây dựng', 'Trả lãi vay + gốc', 'Thuế'],
+    datasets: [{
+      label: 'Chi T4 thực tế (triệu VND)',
+      data: [4136, 2239, 644, 493, 240, 154, 173],
+      backgroundColor: ['#534AB7', '#7F77DD', '#EF9F27', '#CECBF6', '#1D9E75', '#BA7517', '#D85A30'],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => c.raw.toLocaleString('vi-VN') + ' tr (' + Math.round(c.raw / 8078 * 100) + '%)' } }
+    },
+    scales: {
+      x: { ticks: { callback: (v) => v.toLocaleString('vi-VN'), font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+      y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+    }
+  }
+});
+
+buildMatrix();
+updateUI();
+</script>
+</body>
+</html>
